@@ -29,7 +29,13 @@ random sampling at the estimated distribution parameters.
 
 ## Installation
 
-Use the following command from inside `R`:
+Use the following command from inside `R` to install from CRAN.
+
+``` r
+install.packages("univariateML")
+```
+
+Or install the development version from Github.
 
 ``` r
 # install.packages("devtools")
@@ -59,6 +65,39 @@ lines(mlweibull(egypt$age))
 
 <img src="man/figures/README-weibull_plot-1.png" width="750px" />
 
+## Supported densities
+
+| Name                                | univariateML function | Package    |
+| ----------------------------------- | --------------------- | ---------- |
+| Cauchy distribution                 | `mlcauchy`            | stats      |
+| Gumbel distribution                 | `mlgumbel`            | extraDistr |
+| Laplace distribution                | `mllaplace`           | extraDistr |
+| Logistic distribution               | `mllogis`             | stats      |
+| Normal distribution                 | `mlnorm`              | stats      |
+| Student t distribution              | `mlstd`               | fGarch     |
+| Generalized Error distribution      | `mlged`               | fGarch     |
+| Skew Normal distribution            | `mlsnorm`             | fGarch     |
+| Skew Student t distribution         | `mlsstd`              | fGarch     |
+| Skew Generalized Error distribution | `mlsged`              | fGarch     |
+| Beta prime distribution             | `mlbetapr`            | extraDistr |
+| Exponential distribution            | `mlexp`               | stats      |
+| Gamma distribution                  | `mlgamma`             | stats      |
+| Inverse gamma distribution          | `mlinvgamma`          | extraDistr |
+| Inverse Gaussian distribution       | `mlinvgauss`          | actuar     |
+| Inverse Weibull distribution        | `mlinvweibull`        | actuar     |
+| Log-logistic distribution           | `mlllogis`            | actuar     |
+| Log-normal distribution             | `mllnorm`             | stats      |
+| Lomax distribution                  | `mllomax`             | extraDistr |
+| Rayleigh distribution               | `mlrayleigh`          | extraDistr |
+| Weibull distribution                | `mlweibull`           | stats      |
+| Log-gamma distribution              | `mllgamma`            | actuar     |
+| Pareto distribution                 | `mlpareto`            | extraDistr |
+| Beta distribution                   | `mlbeta`              | stats      |
+| Kumaraswamy distribution            | `mlkumar`             | extraDistr |
+| Logit-normal                        | `mllogitnorm`         | logitnorm  |
+| Uniform distribution                | `mlunif`              | stats      |
+| Power distribution                  | `mlpower`             | extraDistr |
+
 ## Implementations
 
 Analytic formulae for the maximum likelihood estimates are used whenever
@@ -76,9 +115,9 @@ microbenchmark::microbenchmark(
   univariateML = univariateML::mlbeta(x),
   naive = nlm(function(p) -sum(dbeta(x, p[1], p[2], log = TRUE)), p = c(1, 1)))
 #> Unit: microseconds
-#>          expr     min       lq      mean   median       uq     max neval
-#>  univariateML   864.2  1102.90  1305.743  1192.30  1340.95  6007.9   100
-#>         naive 36398.0 39097.35 41108.804 40530.15 43035.50 50693.3   100
+#>          expr     min       lq      mean  median      uq     max neval
+#>  univariateML   289.7   345.10   412.137   392.5   452.3  1224.4   100
+#>         naive 11414.1 11703.25 12143.335 11883.6 12179.4 28018.6   100
 ```
 
 The maximum likelihood estimators in this package have all been subject
@@ -88,9 +127,7 @@ to testing, see the `tests` folder for details.
 
 For an overview of the package and its features see the [overview
 vignette](https://univariateml.netlify.com/articles/overview.html). For
-a list of implemented densities see the start of the [details
-vignette](https://univariateml.netlify.com/articles/distributions.html).
-For an illustration of how this package can make an otherwise long and
+an illustration of how this package can make an otherwise long and
 laborious process much simpler, see the [copula
 vignette](https://univariateml.netlify.com/articles/copula.html).
 

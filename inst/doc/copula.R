@@ -1,39 +1,41 @@
-## ----abalone-------------------------------------------------------------
+## ----abalone------------------------------------------------------------------
 library("univariateML")
 head(abalone)
 
-## ---- make_data, fig.width = 6, fig.height = 5---------------------------
+## ---- make_data, fig.width = 6, fig.height = 5--------------------------------
 
 data = dplyr::filter(abalone, height < 0.5)
 data$age = data$rings + 1.5
-hist(data$height, main =" Abalone height", xlab = "Height in mm")
+data = data[c("diameter", "height", "shell_weight", "age")]
+hist(data$height, main = "Abalone height", xlab = "Height in mm")
 
-
-## ---- models-------------------------------------------------------------
-models = c("mlgumbel", "mllaplace", "mllogis", "mlnorm", "mlexp", "mlgamma", 
-             "mlinvgamma", "mlinvgauss", "mlinvweibull", "mlllogis", "mllnorm", 
-             "mlrayleigh", "mlweibull", "mllgamma", "mlpareto", "mlbeta", "mlkumar",
-             "mllogitnorm")
+## ---- models------------------------------------------------------------------
+models = c("gumbel", "laplace", "logis", "norm", "exp", "gamma", 
+           "invgamma", "invgauss", "invweibull", "llogis", "lnorm", 
+           "rayleigh", "weibull", "lgamma", "pareto", "beta", "kumar",
+           "logitnorm")
 length(models)
 
-## ---- AICs---------------------------------------------------------------
-#' Calculate AICs for a column 
-#' @param variable The variable to calculate AICs for.
-#' @return A named vector of AICs.
+## ---- all_models--------------------------------------------------------------
+univariateML_models
 
-AICs = function(variable) {
-  x = data[[variable]]
-  FUN = function(name, x = NULL) tryCatch(expr = eval(call(name, x)), 
-                                                 error = function(e) NULL)
-  fits = Filter(Negate(is.null), sapply(X = models, FUN = FUN, x = x))
-  sort(sapply(fits, AIC))
-}
+## ---- margin_select-----------------------------------------------------------
+margin_fits <- lapply(data, model_select, models = models, criterion = "aic")
 
+## ---- AIC_copula, warning = FALSE, cache = TRUE-------------------------------
 
-## ---- full_call_diamter--------------------------------------------------
-AICs("age")
+# Transform the marginals to the unit interval.
+y = sapply(seq_along(data), function(j) pml(data[[j]], margin_fits[[j]]))
 
-## ---- partial_call-------------------------------------------------------
-sapply(X = c("diameter", "height", "shell_weight", "age"), 
-       FUN = function(x) names(AICs(x))[1])
+# The copulas described above.
+copulas = list(normal = copula::normalCopula(dim = 4, dispstr = "un"),
+               t = copula::tCopula(dim = 4, dispstr = "un"),
+               joe = copula::joeCopula(dim = 4),
+               clayton = copula::claytonCopula(dim = 4),
+               gumbel = copula::gumbelCopula(dim = 4))
+
+fits = sapply(copulas,
+              function(x) copula::fitCopula(x, data = y, method = "mpl"))
+
+sapply(fits, AIC)
 

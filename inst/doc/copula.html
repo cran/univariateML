@@ -1,44 +1,57 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
 
 <title>Copula Modeling</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -47,9 +60,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -116,9 +129,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -287,7 +297,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -306,15 +317,18 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <p>This vignette shows how to model multivariate distributions with <a href="https://en.wikipedia.org/wiki/Copula_(probability_theory)">copulas</a> using <code>univariateML</code> and the <code>copula</code> package.</p>
 <p>A <strong>copula</strong> is a function describing the dependency among a set of one-dimensional distributions. If both the marginal distributions and the copula is known, the entire multivariate distribution is known too.</p>
-<p>Suppose we look at a multivariate distribution as the pair of a copula and its marginals. Then a natural model selection using is to</p>
-<p>1.) select the marginal distributions using the <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">AIC</a>; 2.) select a copula using the marginal data transformed to the unit interval, again using the AIC.</p>
+<p>Suppose we look at a multivariate distribution as the pair of a copula and its marginals. Then a natural model selection method is to</p>
+<ol style="list-style-type: decimal">
+<li>Select the marginal distributions using the <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">AIC</a>.</li>
+<li>Select a copula using the marginal data transformed to the unit interval, again using the AIC.</li>
+</ol>
 <p>This two-step procedure is commonly used due to its simplicity. The procedure must be carried out this order since the marginal data cannot be transformed to the unit interval unless we know the marginal distributions.</p>
 <p>The <code>univariateML</code> can be used for task 1, while the <code>copula</code> package can be used to do task 2.</p>
 <div id="abalone-data" class="section level2">
 <h2>Abalone data</h2>
 <p>The <code>abalone</code> data set is included in this package. It consists of <span class="math inline">\(9\)</span> physical measurements of <span class="math inline">\(4177\)</span> sea snails.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(<span class="st">&quot;univariateML&quot;</span>)</a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw">head</span>(abalone)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">library</span>(<span class="st">&quot;univariateML&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">head</span>(abalone)</span></code></pre></div>
 <pre><code>##   sex length diameter height whole_weight shucked_weight viscera_weight
 ## 1   M  0.455    0.365  0.095       0.5140         0.2245         0.1010
 ## 2   M  0.350    0.265  0.090       0.2255         0.0995         0.0485
@@ -329,71 +343,53 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 4        0.155    10
 ## 5        0.055     7
 ## 6        0.120     8</code></pre>
-<p>Following <span class="citation">Ko, Hjort, and Hobæk Haff (2019)</span> we will take a look at four measurements of the abalones, namely <code>diameter</code>, <code>height</code>, <code>shell_weight</code> and <code>age</code>. The variable <code>age</code> is not present in the <code>abalone</code> data, but is defined as <code>age = rings + 1.5</code>. Moreover, there are two outliers in the <code>height</code> data at at <span class="math inline">\(1.13\)</span> and <span class="math inline">\(0.52\)</span>. We will remove these outliers.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">data =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">filter</span>(abalone, height <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)</a>
-<a class="sourceLine" id="cb3-2" title="2">data<span class="op">$</span>age =<span class="st"> </span>data<span class="op">$</span>rings <span class="op">+</span><span class="st"> </span><span class="fl">1.5</span></a>
-<a class="sourceLine" id="cb3-3" title="3"><span class="kw">hist</span>(data<span class="op">$</span>height, <span class="dt">main =</span><span class="st">&quot; Abalone height&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Height in mm&quot;</span>)</a></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Following <span class="citation">Ko, Hjort, and Hobæk Haff (2019)</span> we will take a look at four measurements of the abalones, namely <code>diameter</code>, <code>height</code>, <code>shell_weight</code> and <code>age</code>. The variable <code>age</code> is not present in the <code>abalone</code> data, but is defined as <code>age = rings + 1.5</code>. Moreover, there are two outliers in the <code>height</code> data at at <span class="math inline">\(1.13\)</span> and <span class="math inline">\(0.52\)</span>. We will remove these outliers and all columns we don’t need in the following.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>data =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">filter</span>(abalone, height <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>data<span class="op">$</span>age =<span class="st"> </span>data<span class="op">$</span>rings <span class="op">+</span><span class="st"> </span><span class="fl">1.5</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>data =<span class="st"> </span>data[<span class="kw">c</span>(<span class="st">&quot;diameter&quot;</span>, <span class="st">&quot;height&quot;</span>, <span class="st">&quot;shell_weight&quot;</span>, <span class="st">&quot;age&quot;</span>)]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="kw">hist</span>(data<span class="op">$</span>height, <span class="dt">main =</span> <span class="st">&quot;Abalone height&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Height in mm&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Let’s continue doing step 1. First we must decide on a set of models to try out.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">models =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;mlgumbel&quot;</span>, <span class="st">&quot;mllaplace&quot;</span>, <span class="st">&quot;mllogis&quot;</span>, <span class="st">&quot;mlnorm&quot;</span>, <span class="st">&quot;mlexp&quot;</span>, <span class="st">&quot;mlgamma&quot;</span>, </a>
-<a class="sourceLine" id="cb4-2" title="2">             <span class="st">&quot;mlinvgamma&quot;</span>, <span class="st">&quot;mlinvgauss&quot;</span>, <span class="st">&quot;mlinvweibull&quot;</span>, <span class="st">&quot;mlllogis&quot;</span>, <span class="st">&quot;mllnorm&quot;</span>, </a>
-<a class="sourceLine" id="cb4-3" title="3">             <span class="st">&quot;mlrayleigh&quot;</span>, <span class="st">&quot;mlweibull&quot;</span>, <span class="st">&quot;mllgamma&quot;</span>, <span class="st">&quot;mlpareto&quot;</span>, <span class="st">&quot;mlbeta&quot;</span>, <span class="st">&quot;mlkumar&quot;</span>,</a>
-<a class="sourceLine" id="cb4-4" title="4">             <span class="st">&quot;mllogitnorm&quot;</span>)</a>
-<a class="sourceLine" id="cb4-5" title="5"><span class="kw">length</span>(models)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>models =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;gumbel&quot;</span>, <span class="st">&quot;laplace&quot;</span>, <span class="st">&quot;logis&quot;</span>, <span class="st">&quot;norm&quot;</span>, <span class="st">&quot;exp&quot;</span>, <span class="st">&quot;gamma&quot;</span>, </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>           <span class="st">&quot;invgamma&quot;</span>, <span class="st">&quot;invgauss&quot;</span>, <span class="st">&quot;invweibull&quot;</span>, <span class="st">&quot;llogis&quot;</span>, <span class="st">&quot;lnorm&quot;</span>, </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>           <span class="st">&quot;rayleigh&quot;</span>, <span class="st">&quot;weibull&quot;</span>, <span class="st">&quot;lgamma&quot;</span>, <span class="st">&quot;pareto&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;kumar&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>           <span class="st">&quot;logitnorm&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a><span class="kw">length</span>(models)</span></code></pre></div>
 <pre><code>## [1] 18</code></pre>
-<p>The nest step is to define a function that calculates the AIC for all our candidate models over every margin.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co">#&#39; Calculate AICs for a column </span></a>
-<a class="sourceLine" id="cb6-2" title="2"><span class="co">#&#39; @param variable The variable to calculate AICs for.</span></a>
-<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&#39; @return A named vector of AICs.</span></a>
-<a class="sourceLine" id="cb6-4" title="4"></a>
-<a class="sourceLine" id="cb6-5" title="5">AICs =<span class="st"> </span><span class="cf">function</span>(variable) {</a>
-<a class="sourceLine" id="cb6-6" title="6">  x =<span class="st"> </span>data[[variable]]</a>
-<a class="sourceLine" id="cb6-7" title="7">  FUN =<span class="st"> </span><span class="cf">function</span>(name, <span class="dt">x =</span> <span class="ot">NULL</span>) <span class="kw">tryCatch</span>(<span class="dt">expr =</span> <span class="kw">eval</span>(<span class="kw">call</span>(name, x)), </a>
-<a class="sourceLine" id="cb6-8" title="8">                                                 <span class="dt">error =</span> <span class="cf">function</span>(e) <span class="ot">NULL</span>)</a>
-<a class="sourceLine" id="cb6-9" title="9">  fits =<span class="st"> </span><span class="kw">Filter</span>(<span class="kw">Negate</span>(is.null), <span class="kw">sapply</span>(<span class="dt">X =</span> models, <span class="dt">FUN =</span> FUN, <span class="dt">x =</span> x))</a>
-<a class="sourceLine" id="cb6-10" title="10">  <span class="kw">sort</span>(<span class="kw">sapply</span>(fits, AIC))</a>
-<a class="sourceLine" id="cb6-11" title="11">}</a></code></pre></div>
-<p>This function returns a vector of AICs for each model where <code>ml***</code> didn’t fail. When it fails it is since the support of the data doesn’t not match the density, for instance when <code>-1</code> is fed to the exponential density.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">AICs</span>(<span class="st">&quot;age&quot;</span>)</a></code></pre></div>
-<pre><code>##      mllnorm     mlgumbel   mlinvgauss     mllgamma      mlgamma 
-##     21033.17     21039.99     21055.60     21100.20     21104.82 
-##   mlinvgamma      mllogis    mllaplace       mlnorm    mlweibull 
-##     21107.62     21295.85     21310.76     21627.91     21893.36 
-## mlinvweibull   mlrayleigh        mlexp     mlpareto     mlllogis 
-##     22050.05     23860.54     28697.63     31678.23    394429.50</code></pre>
-<p>But we are most interested in the models with smallest AICs.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">sapply</span>(<span class="dt">X =</span> <span class="kw">c</span>(<span class="st">&quot;diameter&quot;</span>, <span class="st">&quot;height&quot;</span>, <span class="st">&quot;shell_weight&quot;</span>, <span class="st">&quot;age&quot;</span>), </a>
-<a class="sourceLine" id="cb9-2" title="2">       <span class="dt">FUN =</span> <span class="cf">function</span>(x) <span class="kw">names</span>(<span class="kw">AICs</span>(x))[<span class="dv">1</span>])</a></code></pre></div>
-<pre><code>##     diameter       height shell_weight          age 
-##    &quot;mlkumar&quot;     &quot;mlnorm&quot;  &quot;mlweibull&quot;    &quot;mllnorm&quot;</code></pre>
+<p>Optionally, we can use all implemented models with</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a>univariateML_models</span></code></pre></div>
+<pre><code>##  [1] &quot;beta&quot;       &quot;betapr&quot;     &quot;cauchy&quot;     &quot;exp&quot;        &quot;gamma&quot;     
+##  [6] &quot;ged&quot;        &quot;gumbel&quot;     &quot;invgamma&quot;   &quot;invgauss&quot;   &quot;invweibull&quot;
+## [11] &quot;kumar&quot;      &quot;laplace&quot;    &quot;lgamma&quot;     &quot;llogis&quot;     &quot;lnorm&quot;     
+## [16] &quot;logis&quot;      &quot;logitnorm&quot;  &quot;lomax&quot;      &quot;naka&quot;       &quot;norm&quot;      
+## [21] &quot;pareto&quot;     &quot;power&quot;      &quot;rayleigh&quot;   &quot;sged&quot;       &quot;snorm&quot;     
+## [26] &quot;sstd&quot;       &quot;std&quot;        &quot;unif&quot;       &quot;weibull&quot;</code></pre>
+<p>The next step is to fit all models, compute the AIC, and select the best model. This is exactly what <code>model_select()</code> does.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>margin_fits &lt;-<span class="st"> </span><span class="kw">lapply</span>(data, model_select, <span class="dt">models =</span> models, <span class="dt">criterion =</span> <span class="st">&quot;aic&quot;</span>)</span></code></pre></div>
 <p>Now we use the <code>fitCopula</code> from the package <code>copula</code> on the transformed margins of <code>abalone</code>.</p>
 <p>We will examine two elliptical copulas and three Archimedean copulas. The elliptical copulas are the Gaussian copula and the <em>t</em>-copula, while the Archimedean copulas are the Joe copula, the Clayton copula, and the Gumbel copula.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co"># Transform the marginals to the unit interval.</span></a>
-<a class="sourceLine" id="cb11-2" title="2">y =<span class="st"> </span><span class="kw">as.matrix</span>(dplyr<span class="op">::</span><span class="kw">transmute</span>(data, </a>
-<a class="sourceLine" id="cb11-3" title="3">                     <span class="dt">diameter =</span> <span class="kw">pml</span>(diameter, <span class="kw">mlkumar</span>(diameter)),</a>
-<a class="sourceLine" id="cb11-4" title="4">                     <span class="dt">height =</span> <span class="kw">pml</span>(height, <span class="kw">mlnorm</span>(height)),</a>
-<a class="sourceLine" id="cb11-5" title="5">                     <span class="dt">shell_weight =</span> <span class="kw">pml</span>(shell_weight, <span class="kw">mlweibull</span>(shell_weight)),</a>
-<a class="sourceLine" id="cb11-6" title="6">                     <span class="dt">age =</span> <span class="kw">pml</span>(age, <span class="kw">mllnorm</span>(rings))))</a>
-<a class="sourceLine" id="cb11-7" title="7"></a>
-<a class="sourceLine" id="cb11-8" title="8"><span class="co"># The copulas described above.</span></a>
-<a class="sourceLine" id="cb11-9" title="9">copulas =<span class="st"> </span><span class="kw">list</span>(<span class="dt">normal =</span> copula<span class="op">::</span><span class="kw">normalCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>, <span class="dt">dispstr =</span> <span class="st">&quot;un&quot;</span>),</a>
-<a class="sourceLine" id="cb11-10" title="10">               <span class="dt">t =</span> copula<span class="op">::</span><span class="kw">tCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>, <span class="dt">dispstr =</span> <span class="st">&quot;un&quot;</span>),</a>
-<a class="sourceLine" id="cb11-11" title="11">               <span class="dt">joe =</span> copula<span class="op">::</span><span class="kw">joeCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>),</a>
-<a class="sourceLine" id="cb11-12" title="12">               <span class="dt">clayton =</span> copula<span class="op">::</span><span class="kw">claytonCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>),</a>
-<a class="sourceLine" id="cb11-13" title="13">               <span class="dt">gumbel =</span> copula<span class="op">::</span><span class="kw">gumbelCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>))</a>
-<a class="sourceLine" id="cb11-14" title="14"></a>
-<a class="sourceLine" id="cb11-15" title="15">fits =<span class="st"> </span><span class="kw">sapply</span>(copulas,</a>
-<a class="sourceLine" id="cb11-16" title="16">              <span class="cf">function</span>(x) copula<span class="op">::</span><span class="kw">fitCopula</span>(x, <span class="dt">data =</span> y, <span class="dt">method =</span> <span class="st">&quot;mpl&quot;</span>))</a>
-<a class="sourceLine" id="cb11-17" title="17"></a>
-<a class="sourceLine" id="cb11-18" title="18"><span class="kw">sapply</span>(fits, AIC)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="co"># Transform the marginals to the unit interval.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>y =<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">seq_along</span>(data), <span class="cf">function</span>(j) <span class="kw">pml</span>(data[[j]], margin_fits[[j]]))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a><span class="co"># The copulas described above.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>copulas =<span class="st"> </span><span class="kw">list</span>(<span class="dt">normal =</span> copula<span class="op">::</span><span class="kw">normalCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>, <span class="dt">dispstr =</span> <span class="st">&quot;un&quot;</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>               <span class="dt">t =</span> copula<span class="op">::</span><span class="kw">tCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>, <span class="dt">dispstr =</span> <span class="st">&quot;un&quot;</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>               <span class="dt">joe =</span> copula<span class="op">::</span><span class="kw">joeCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a>               <span class="dt">clayton =</span> copula<span class="op">::</span><span class="kw">claytonCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>               <span class="dt">gumbel =</span> copula<span class="op">::</span><span class="kw">gumbelCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a>fits =<span class="st"> </span><span class="kw">sapply</span>(copulas,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a>              <span class="cf">function</span>(x) copula<span class="op">::</span><span class="kw">fitCopula</span>(x, <span class="dt">data =</span> y, <span class="dt">method =</span> <span class="st">&quot;mpl&quot;</span>))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a><span class="kw">sapply</span>(fits, AIC)</span></code></pre></div>
 <pre><code>##    normal         t       joe   clayton    gumbel 
-## -20776.28 -21856.69 -10139.89 -14546.95 -13586.67</code></pre>
+## -21802.09 -23112.68  -8321.34 -16289.37 -12605.96</code></pre>
 <p>The <em>t</em>-copula is the clear winner of the AIC competition. The Archimedean copulas perform particularly poorly.</p>
 <p>Hence our final model is the <em>t</em>-copula with Kumaraswamy (<code>mlkumar</code>) marginal distribution for <code>diameter</code>, normal marginal distribution for <code>height</code>, Weibull marginal distribution for <code>shell_weight</code>, and log normal marginal distribution for <code>age</code>.</p>
 </div>
 <div id="references" class="section level2 unnumbered">
-<h2>References</h2>
-<div id="refs" class="references">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references hanging-indent">
 <div id="ref-ko2019focused">
 <p>Ko, Vinnie, Nils Lid Hjort, and Ingrid Hobæk Haff. 2019. “Focused Information Criteria for Copulas.” <em>Scandinavian Journal of Statistics</em>.</p>
 </div>
