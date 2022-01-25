@@ -40,13 +40,15 @@ mlllogis <- function(x, na.rm = FALSE, ...) {
   y <- log(x)
 
   object <- mllogis(y)
+  object[1] <- exp(-object[1])
+  object[2] <- 1 / object[2]
+  object <- rev(object)
   class(object) <- "univariateML"
   names(object) <- c("shape", "rate")
-  object[1] <- exp(object[1])
-  object[2] <- 1 / object[2]
 
   attr(object, "model") <- "Loglogistic"
   attr(object, "density") <- "actuar::dllogis"
+  attr(object, "n") <- length(x)
   attr(object, "logLik") <-
     sum(actuar::dllogis(x, object[1], object[2], log = TRUE))
   attr(object, "support") <- c(0, Inf)

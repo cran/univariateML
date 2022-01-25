@@ -14,26 +14,31 @@
 
 <title>Copula Modeling</title>
 
-<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
-// be compatible with the behavior of Pandoc < 2.8).
-document.addEventListener('DOMContentLoaded', function(e) {
-  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
-  var i, h, a;
-  for (i = 0; i < hs.length; i++) {
-    h = hs[i];
-    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
-    a = h.attributes;
-    while (a.length > 0) h.removeAttribute(a[0].name);
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
   }
-});
-</script>
-
-
-<style type="text/css">code{white-space: pre;}</style>
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
@@ -119,187 +124,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
 }
-#TOC ul ul {
-margin-left: -2em;
+div.csl-indent {
+  margin-left: 2em;
 }
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
-
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
 
 
 
@@ -327,8 +175,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="abalone-data" class="section level2">
 <h2>Abalone data</h2>
 <p>The <code>abalone</code> data set is included in this package. It consists of <span class="math inline">\(9\)</span> physical measurements of <span class="math inline">\(4177\)</span> sea snails.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">library</span>(<span class="st">&quot;univariateML&quot;</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">head</span>(abalone)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;univariateML&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(abalone)</span></code></pre></div>
 <pre><code>##   sex length diameter height whole_weight shucked_weight viscera_weight
 ## 1   M  0.455    0.365  0.095       0.5140         0.2245         0.1010
 ## 2   M  0.350    0.265  0.090       0.2255         0.0995         0.0485
@@ -344,20 +192,20 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## 5        0.055     7
 ## 6        0.120     8</code></pre>
 <p>Following <span class="citation">Ko, Hjort, and Hobæk Haff (2019)</span> we will take a look at four measurements of the abalones, namely <code>diameter</code>, <code>height</code>, <code>shell_weight</code> and <code>age</code>. The variable <code>age</code> is not present in the <code>abalone</code> data, but is defined as <code>age = rings + 1.5</code>. Moreover, there are two outliers in the <code>height</code> data at at <span class="math inline">\(1.13\)</span> and <span class="math inline">\(0.52\)</span>. We will remove these outliers and all columns we don’t need in the following.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>data =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">filter</span>(abalone, height <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>data<span class="op">$</span>age =<span class="st"> </span>data<span class="op">$</span>rings <span class="op">+</span><span class="st"> </span><span class="fl">1.5</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>data =<span class="st"> </span>data[<span class="kw">c</span>(<span class="st">&quot;diameter&quot;</span>, <span class="st">&quot;height&quot;</span>, <span class="st">&quot;shell_weight&quot;</span>, <span class="st">&quot;age&quot;</span>)]</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="kw">hist</span>(data<span class="op">$</span>height, <span class="dt">main =</span> <span class="st">&quot;Abalone height&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Height in mm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(abalone, height <span class="sc">&lt;</span> <span class="fl">0.5</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>age <span class="ot">=</span> data<span class="sc">$</span>rings <span class="sc">+</span> <span class="fl">1.5</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> data[<span class="fu">c</span>(<span class="st">&quot;diameter&quot;</span>, <span class="st">&quot;height&quot;</span>, <span class="st">&quot;shell_weight&quot;</span>, <span class="st">&quot;age&quot;</span>)]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(data<span class="sc">$</span>height, <span class="at">main =</span> <span class="st">&quot;Abalone height&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;Height in mm&quot;</span>)</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Let’s continue doing step 1. First we must decide on a set of models to try out.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>models =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;gumbel&quot;</span>, <span class="st">&quot;laplace&quot;</span>, <span class="st">&quot;logis&quot;</span>, <span class="st">&quot;norm&quot;</span>, <span class="st">&quot;exp&quot;</span>, <span class="st">&quot;gamma&quot;</span>, </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>           <span class="st">&quot;invgamma&quot;</span>, <span class="st">&quot;invgauss&quot;</span>, <span class="st">&quot;invweibull&quot;</span>, <span class="st">&quot;llogis&quot;</span>, <span class="st">&quot;lnorm&quot;</span>, </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>           <span class="st">&quot;rayleigh&quot;</span>, <span class="st">&quot;weibull&quot;</span>, <span class="st">&quot;lgamma&quot;</span>, <span class="st">&quot;pareto&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;kumar&quot;</span>,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>           <span class="st">&quot;logitnorm&quot;</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a><span class="kw">length</span>(models)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;gumbel&quot;</span>, <span class="st">&quot;laplace&quot;</span>, <span class="st">&quot;logis&quot;</span>, <span class="st">&quot;norm&quot;</span>, <span class="st">&quot;exp&quot;</span>, <span class="st">&quot;gamma&quot;</span>, </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>           <span class="st">&quot;invgamma&quot;</span>, <span class="st">&quot;invgauss&quot;</span>, <span class="st">&quot;invweibull&quot;</span>, <span class="st">&quot;llogis&quot;</span>, <span class="st">&quot;lnorm&quot;</span>, </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">&quot;rayleigh&quot;</span>, <span class="st">&quot;weibull&quot;</span>, <span class="st">&quot;lgamma&quot;</span>, <span class="st">&quot;pareto&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;kumar&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>           <span class="st">&quot;logitnorm&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(models)</span></code></pre></div>
 <pre><code>## [1] 18</code></pre>
 <p>Optionally, we can use all implemented models with</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a>univariateML_models</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>univariateML_models</span></code></pre></div>
 <pre><code>##  [1] &quot;beta&quot;       &quot;betapr&quot;     &quot;cauchy&quot;     &quot;exp&quot;        &quot;gamma&quot;     
 ##  [6] &quot;ged&quot;        &quot;gumbel&quot;     &quot;invgamma&quot;   &quot;invgauss&quot;   &quot;invweibull&quot;
 ## [11] &quot;kumar&quot;      &quot;laplace&quot;    &quot;lgamma&quot;     &quot;llogis&quot;     &quot;lnorm&quot;     
@@ -365,33 +213,33 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## [21] &quot;pareto&quot;     &quot;power&quot;      &quot;rayleigh&quot;   &quot;sged&quot;       &quot;snorm&quot;     
 ## [26] &quot;sstd&quot;       &quot;std&quot;        &quot;unif&quot;       &quot;weibull&quot;</code></pre>
 <p>The next step is to fit all models, compute the AIC, and select the best model. This is exactly what <code>model_select()</code> does.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>margin_fits &lt;-<span class="st"> </span><span class="kw">lapply</span>(data, model_select, <span class="dt">models =</span> models, <span class="dt">criterion =</span> <span class="st">&quot;aic&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>margin_fits <span class="ot">&lt;-</span> <span class="fu">lapply</span>(data, model_select, <span class="at">models =</span> models, <span class="at">criterion =</span> <span class="st">&quot;aic&quot;</span>)</span></code></pre></div>
 <p>Now we use the <code>fitCopula</code> from the package <code>copula</code> on the transformed margins of <code>abalone</code>.</p>
 <p>We will examine two elliptical copulas and three Archimedean copulas. The elliptical copulas are the Gaussian copula and the <em>t</em>-copula, while the Archimedean copulas are the Joe copula, the Clayton copula, and the Gumbel copula.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="co"># Transform the marginals to the unit interval.</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>y =<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">seq_along</span>(data), <span class="cf">function</span>(j) <span class="kw">pml</span>(data[[j]], margin_fits[[j]]))</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a><span class="co"># The copulas described above.</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>copulas =<span class="st"> </span><span class="kw">list</span>(<span class="dt">normal =</span> copula<span class="op">::</span><span class="kw">normalCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>, <span class="dt">dispstr =</span> <span class="st">&quot;un&quot;</span>),</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>               <span class="dt">t =</span> copula<span class="op">::</span><span class="kw">tCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>, <span class="dt">dispstr =</span> <span class="st">&quot;un&quot;</span>),</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>               <span class="dt">joe =</span> copula<span class="op">::</span><span class="kw">joeCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>),</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a>               <span class="dt">clayton =</span> copula<span class="op">::</span><span class="kw">claytonCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>),</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>               <span class="dt">gumbel =</span> copula<span class="op">::</span><span class="kw">gumbelCopula</span>(<span class="dt">dim =</span> <span class="dv">4</span>))</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a>fits =<span class="st"> </span><span class="kw">sapply</span>(copulas,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a>              <span class="cf">function</span>(x) copula<span class="op">::</span><span class="kw">fitCopula</span>(x, <span class="dt">data =</span> y, <span class="dt">method =</span> <span class="st">&quot;mpl&quot;</span>))</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a><span class="kw">sapply</span>(fits, AIC)</span></code></pre></div>
-<pre><code>##    normal         t       joe   clayton    gumbel 
-## -21802.09 -23112.68  -8321.34 -16289.37 -12605.96</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform the marginals to the unit interval.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">sapply</span>(<span class="fu">seq_along</span>(data), <span class="cf">function</span>(j) <span class="fu">pml</span>(data[[j]], margin_fits[[j]]))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># The copulas described above.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>copulas <span class="ot">=</span> <span class="fu">list</span>(<span class="at">normal =</span> copula<span class="sc">::</span><span class="fu">normalCopula</span>(<span class="at">dim =</span> <span class="dv">4</span>, <span class="at">dispstr =</span> <span class="st">&quot;un&quot;</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">t =</span> copula<span class="sc">::</span><span class="fu">tCopula</span>(<span class="at">dim =</span> <span class="dv">4</span>, <span class="at">dispstr =</span> <span class="st">&quot;un&quot;</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">joe =</span> copula<span class="sc">::</span><span class="fu">joeCopula</span>(<span class="at">dim =</span> <span class="dv">4</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">clayton =</span> copula<span class="sc">::</span><span class="fu">claytonCopula</span>(<span class="at">dim =</span> <span class="dv">4</span>),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">gumbel =</span> copula<span class="sc">::</span><span class="fu">gumbelCopula</span>(<span class="at">dim =</span> <span class="dv">4</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>fits <span class="ot">=</span> <span class="fu">sapply</span>(copulas,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>              <span class="cf">function</span>(x) copula<span class="sc">::</span><span class="fu">fitCopula</span>(x, <span class="at">data =</span> y, <span class="at">method =</span> <span class="st">&quot;mpl&quot;</span>))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(fits, AIC)</span></code></pre></div>
+<pre><code>##     normal          t        joe    clayton     gumbel 
+## -21822.309 -23152.657  -8668.457 -16502.422 -12821.817</code></pre>
 <p>The <em>t</em>-copula is the clear winner of the AIC competition. The Archimedean copulas perform particularly poorly.</p>
 <p>Hence our final model is the <em>t</em>-copula with Kumaraswamy (<code>mlkumar</code>) marginal distribution for <code>diameter</code>, normal marginal distribution for <code>height</code>, Weibull marginal distribution for <code>shell_weight</code>, and log normal marginal distribution for <code>age</code>.</p>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2 class="unnumbered">References</h2>
-<div id="refs" class="references hanging-indent">
-<div id="ref-ko2019focused">
-<p>Ko, Vinnie, Nils Lid Hjort, and Ingrid Hobæk Haff. 2019. “Focused Information Criteria for Copulas.” <em>Scandinavian Journal of Statistics</em>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-ko2019focused" class="csl-entry">
+Ko, Vinnie, Nils Lid Hjort, and Ingrid Hobæk Haff. 2019. <span>“Focused Information Criteria for Copulas.”</span> <em>Scandinavian Journal of Statistics</em>.
 </div>
 </div>
 </div>
