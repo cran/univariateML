@@ -55,3 +55,7 @@ est <- mlgumbel(tiny_data)
 ## Check class.
 expect_equal(attr(est, "model"), "Gumbel")
 expect_equal(class(est), "univariateML")
+
+
+## Check support.
+expect_equal(class(attr(est, "support"))[[1]], "numeric")

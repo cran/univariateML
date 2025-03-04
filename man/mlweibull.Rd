@@ -12,7 +12,7 @@ mlweibull(x, na.rm = FALSE, ...)
 \item{na.rm}{logical. Should missing values be removed?}
 
 \item{...}{\code{shape0} is an optional starting value for the \code{shape} parameter.
-\code{rel.tol} is the relative accuracy requested, defaults
+\code{reltol} is the relative accuracy requested, defaults
 to \code{.Machine$double.eps^0.25}. \code{iterlim} is a positive integer
 specifying the maximum number of iterations to be performed before the
 program is terminated (defaults to \code{100}).}
@@ -29,11 +29,11 @@ This is a named numeric vector with maximum likelihood estimates for
 \item{\code{call}}{The call as captured my \code{match.call}}
 }
 \description{
-Uses Newton-Raphson to estimate the parameters of the Weibull distribution.
-}
-\details{
 For the density function of the Weibull distribution see
 \link[stats:Weibull]{Weibull}.
+}
+\details{
+Uses \link{mlgumbel} to estimate the parameters of the Weibull distribution.
 }
 \examples{
 BIC(mlweibull(precip))

@@ -17,29 +17,36 @@ expect_error(model_select(tiny_data, criterion = "cv"))
 
 ## Checks that na.rm works as intended.
 expect_equal(
-  coef(model_select(small_data)),
-  coef(model_select(c(small_data, NA), na.rm = TRUE))
+  coef(model_select(small_data, models = c("norm", "cauchy"))),
+  coef(model_select(c(small_data, NA), models = c("norm", "cauchy"), na.rm = TRUE))
 )
 
 ## Does it find the correct model?
 est <- mlnorm(small_data)
+est_aic <- model_select(small_data, models = c("norm", "cauchy"), criterion = "aic")
+est_select <- model_select(small_data, models = c("norm", "cauchy"), criterion = "loglik")
+est_bic <- model_select(small_data, models = c("norm", "cauchy"), criterion = "bic")
+
 attr(est, "call") <- str2lang("f(x = x, na.rm = na.rm)")
-expect_equal(
-  est,
-  model_select(small_data, models = c("norm", "cauchy"), criterion = "loglik")
-)
+attr(est_aic, "call") <- str2lang("f(x = x, na.rm = na.rm)")
+attr(est_select, "call") <- str2lang("f(x = x, na.rm = na.rm)")
+attr(est_bic, "call") <- str2lang("f(x = x, na.rm = na.rm)")
 
-expect_equal(
-  est,
-  model_select(small_data, models = c("norm", "cauchy"), criterion = "aic")
-)
-
-expect_equal(
-  est,
-  model_select(small_data, models = c("norm", "cauchy"), criterion = "bic")
-)
+expect_equal(est, est_aic)
+expect_equal(est, est_select)
+expect_equal(est, est_bic)
 
 ## Check class.
 est <- model_select(small_data, models = c("norm", "cauchy"))
 expect_equal(attr(est, "model"), "Normal")
 expect_equal(class(est), "univariateML")
+
+
+## Test data frame version
+est <- model_select(small_data, models = c("norm", "cauchy", "zipf"), type = "continuous", return = "all")
+expect(est |> inherits("data.frame"), "est is not a data frame")
+expect_equal(est$model, c("Normal", "Cauchy"))
+expect_equal(
+  c(est$d_logLik[[1]], est$d_AIC[[1]], est$d_BIC[[1]]),
+  c(0, 0, 0)
+)

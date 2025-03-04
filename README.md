@@ -17,12 +17,13 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [`univariateML`](https://jonasmoss.github.io/univariateML/index.html) is
 an `R`-package for user-friendly maximum likelihood estimation of a
 [selection](https://jonasmoss.github.io/univariateML/articles/distributions.html)
-of parametric univariate densities. In addition to basic estimation
-capabilities, this package support visualization through `plot` and
-`qqmlplot`, model selection by `AIC` and `BIC`, confidence sets through
-the parametric bootstrap with `bootstrapml`, and convenience functions
-such as the density, distribution function, quantile function, and
-random sampling at the estimated distribution parameters.
+of parametric univariate densities and probability mass functions. In
+addition to basic estimation capabilities, this package support
+visualization through `plot` and `qqmlplot`, model selection by `AIC`
+and `BIC`, confidence sets through the parametric bootstrap with
+`bootstrapml`, and convenience functions such as the density,
+distribution function, quantile function, and random sampling at the
+estimated distribution parameters.
 
 ## Installation
 
@@ -47,6 +48,7 @@ distribution suffix such as `norm`, `gamma`, or `weibull`.
 ``` r
 library("univariateML")
 mlweibull(egypt$age)
+#> Loading required package: intervals
 #> Maximum likelihood estimates for the Weibull model 
 #>  shape   scale  
 #>  1.404  33.564
@@ -62,7 +64,9 @@ lines(mlweibull(egypt$age))
 
 <img src="man/figures/README-weibull_plot-1.png" width="750px" />
 
-## Supported densities
+## Supported distributions
+
+### Continuous distributions
 
 | Name                                | univariateML function | Package    |
 |-------------------------------------|-----------------------|------------|
@@ -94,6 +98,23 @@ lines(mlweibull(egypt$age))
 | Logit-normal                        | `mllogitnorm`         | logitnorm  |
 | Uniform distribution                | `mlunif`              | stats      |
 | Power distribution                  | `mlpower`             | extraDistr |
+| Gompertz distribution               | `mlgompertz`          | extraDistr |
+| Burr distribution                   | `mlburr`              | actuar     |
+| Inverse Burr distribution           | `mlinvburr`           | actuar     |
+| Birnbaum-Saunders                   | `mlfatigue`           | extraDistr |
+
+### Discrete distributions
+
+| Name                               | univariateML function | Package    |
+|------------------------------------|-----------------------|------------|
+| Poisson distribution               | `mlpois`              | stats      |
+| Negative binomial distribution     | `mlnbinom`            | stats      |
+| Binomial distribution              | `mlbinom`             | stats      |
+| Geometric distribution             | `mlgeom`              | stats      |
+| Zipf distribution                  | `mlzipf`              | sads       |
+| Zero-inflated Poisson distribution | `mlzip`               | extraDistr |
+| Discrete uniform distribution      | `mldunif`             | extraDistr |
+| Logarithmic series distribution    | `mldunif`             | extraDistr |
 
 ## Implementations
 
@@ -110,11 +131,12 @@ x <- rbeta(500, 2, 7)
 
 microbenchmark::microbenchmark(
   univariateML = univariateML::mlbeta(x),
-  naive = nlm(function(p) -sum(dbeta(x, p[1], p[2], log = TRUE)), p = c(1, 1)))
+  naive = nlm(function(p) -sum(dbeta(x, p[1], p[2], log = TRUE)), p = c(1, 1))
+)
 #> Unit: microseconds
-#>          expr     min       lq      mean   median       uq     max neval
-#>  univariateML   259.2   348.75   557.959   447.05   536.40  5103.5   100
-#>         naive 15349.1 15978.35 16955.165 16365.45 17082.25 48941.4   100
+#>          expr    min      lq     mean median     uq     max neval
+#>  univariateML  201.4  244.05  349.978  365.6  422.2   791.9   100
+#>         naive 8289.4 8652.60 9170.378 8915.3 9288.0 18723.0   100
 ```
 
 The maximum likelihood estimators in this package have all been subject

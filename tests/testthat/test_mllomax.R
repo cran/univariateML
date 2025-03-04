@@ -29,8 +29,8 @@ expect_equal(mle4, as.numeric(mllomax(large_data)), tolerance = 1e-3)
 expect_warning(mllomax(small_data, iterlim = 1))
 
 ## Error when the MLE does not exist.
-expect_error(mllomax(airquality$Wind))
-expect_error(mllomax(tiny_data, start = median(tiny_data)))
+expect_error(suppressWarnings(mllomax(airquality$Wind)))
+expect_error(suppressWarnings(mllomax(tiny_data, start = median(tiny_data))))
 
 ## Finds errors with na and data out of bounds.
 expect_error(mllomax(c(tiny_data, NA)))
@@ -52,3 +52,7 @@ expect_equal(
 ## Check class.
 expect_equal(attr(est, "model"), "Lomax")
 expect_equal(class(est), "univariateML")
+
+
+## Check support.
+expect_equal(class(attr(est, "support"))[[1]], "numeric")

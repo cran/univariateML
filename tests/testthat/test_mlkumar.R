@@ -1,4 +1,4 @@
-context("mlgumbel")
+context("mlkumar")
 
 ## Data generation.
 set.seed(313)
@@ -57,3 +57,7 @@ est <- mlkumar(tiny_data)
 ## Check class.
 expect_equal(attr(est, "model"), "Kumaraswamy")
 expect_equal(class(est), "univariateML")
+
+
+## Check support.
+expect_equal(class(attr(est, "support"))[[1]], "numeric")

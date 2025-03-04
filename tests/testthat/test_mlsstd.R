@@ -47,3 +47,7 @@ expect_equal(
 ## Check class.
 expect_equal(attr(est, "model"), "Skew Student-t")
 expect_equal(class(est), "univariateML")
+
+
+## Check support.
+expect_equal(class(attr(est, "support"))[[1]], "numeric")

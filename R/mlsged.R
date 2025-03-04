@@ -21,24 +21,22 @@
 #' mlsged(precip)
 #' @seealso [sged][fGarch::sged] for the Student t-density.
 #' @references Nelson D.B. (1991); Conditional Heteroscedasticity in Asset
-#'   Returns: A New Approach, Econometrica, 59, 347–370.
+#'   Returns: A New Approach, Econometrica, 59, 347<U+2013>370.
 #'
 #'   Fernandez C., Steel M.F.J. (2000); On Bayesian Modelling of Fat Tails and
 #'   Skewness, Preprint.
 #' @export
+mlsged <- function(x, na.rm = FALSE, ...) {}
 
-mlsged <- function(x, na.rm = FALSE, ...) {
-  if (na.rm) x <- x[!is.na(x)] else assertthat::assert_that(!anyNA(x))
-  ml_input_checker(x)
+univariateML_metadata$mlsged <- list(
+  "model" = "Skew Generalized Error",
+  "density" = "fGarch::dsged",
+  "support" = intervals::Intervals(c(-Inf, Inf), closed = c(FALSE, FALSE)),
+  "names" = c("mean", "sd", "nu", "xi"),
+  "default" = c(0, 1, 3, 3)
+)
 
+mlsged_ <- function(x, ...) {
   fit <- suppressWarnings(fGarch::sgedFit(x))
-  object <- fit[["par"]]
-  class(object) <- "univariateML"
-  attr(object, "model") <- "Skew Generalized Error"
-  attr(object, "density") <- "fGarch::dsged"
-  attr(object, "logLik") <- -fit$objective
-  attr(object, "support") <- c(-Inf, Inf)
-  attr(object, "n") <- length(x)
-  attr(object, "call") <- match.call()
-  object
+  list(estimates = fit[["par"]], logLik = -fit$objective)
 }

@@ -66,8 +66,9 @@
 #' hist(bootstrapml(object, reducer = identity))
 #' }
 #'
-bootstrapml <- function(object, reps = 1000, map = identity,
-                        reducer = stats::quantile, ...) {
+bootstrapml <- function(
+    object, reps = 1000, map = identity,
+    reducer = stats::quantile, ...) {
   r_fun <- univariateML_to_function(object, type = "r")
   ml_fun <- univariateML_to_function(object, type = "ml")
   bootstraps <- replicate(n = reps, expr = ml_fun(r_fun(attr(object, "n"))))

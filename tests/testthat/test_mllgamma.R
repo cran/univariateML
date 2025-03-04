@@ -38,4 +38,4 @@ expect_equal(class(est), "univariateML")
 expect_equal(names(est), c("shapelog", "ratelog"))
 
 ## Check support.
-attr(est, "support") <- c(1, Inf)
+expect_equal(class(attr(est, "support"))[[1]], "numeric")

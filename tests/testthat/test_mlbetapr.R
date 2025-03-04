@@ -61,5 +61,10 @@ expect_equal(
 )
 
 ## Check class.
-expect_equal(attr(mlbetapr(tiny_data), "model"), "BetaPrime")
-expect_equal(class(mlbetapr(tiny_data)), "univariateML")
+est <- mlbetapr(tiny_data)
+expect_equal(attr(est, "model"), "BetaPrime")
+expect_equal(class(est), "univariateML")
+
+
+## Check support.
+expect_equal(class(attr(est, "support"))[[1]], "numeric")

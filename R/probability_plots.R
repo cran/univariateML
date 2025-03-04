@@ -7,7 +7,7 @@
 #' `y` with respect to the distribution defined by `obj`, which is
 #' either a `univariateML` object or a function returning a
 #' `univariateML` object when called with `y`. `qqmlline` adds a
-#' line to a “theoretical”, quantile-quantile plot which passes through
+#' line to a <U+201C>theoretical<U+201D>, quantile-quantile plot which passes through
 #' the `probs` quantiles, by default the first and third quartiles.
 #' `qqmlpoints`behaves like `stats::points` and adds a Q-Q plot to
 #' an existing plot.
@@ -17,6 +17,9 @@
 #' quantile-quantile plot functions.
 #'
 #' This function is modeled after [qqnorm][stats::qqnorm].
+#'
+#' Quantile-quantile plots and probability-probability plots are only supported
+#' for continuous distributions.
 #'
 #' Graphical parameters may be given as arguments to all the functions below.
 #'
@@ -57,7 +60,7 @@
 #' @references
 #'   M. B. Wilk, R. Gnadadesikan, Probability plotting methods for the analysis
 #'   for the analysis of data, Biometrika, Volume 55, Issue 1, March 1968,
-#'   Pages 1–17, https://doi.org/10.1093/biomet/55.1.1
+#'   Pages 1<U+2013>17, https://doi.org/10.1093/biomet/55.1.1
 
 ppmlplot <- function(y, obj, plot.it = TRUE, datax = FALSE, ...) {
   pp <- ppqq_wrangler(y, obj, datax, pp = TRUE, ...)
@@ -87,8 +90,9 @@ qqmlplot <- function(y, obj, plot.it = TRUE, datax = FALSE, ...) {
 
 #' @rdname ProbabilityPlots
 #' @export
-qqmlline <- function(y, obj, datax = FALSE, probs = c(0.25, 0.75), qtype = 7,
-                     ...) {
+qqmlline <- function(
+    y, obj, datax = FALSE, probs = c(0.25, 0.75), qtype = 7,
+    ...) {
   obj <- to_univariateML(y, obj)
   y <- stats::quantile(y, probs, names = FALSE, type = qtype, na.rm = TRUE)
   x <- qml(probs, obj)
@@ -110,4 +114,82 @@ qqmlpoints <- function(y, obj, plot.it = TRUE, datax = TRUE, ...) {
   qq <- ppqq_wrangler(y, obj, datax, pp = FALSE, ...)
   if (plot.it) do.call(graphics::points, qq$args)
   invisible(qq$value)
+}
+
+
+#' Wrangles arguments for use in ppml and qqml functions.
+#'
+#' @param y The input data.
+#' @param obj Function or continuous `"univariateML"` object.
+#' @param datax logical; if true, plots the data on the x axis.
+#' @param ... Arguments passed to `plot` or `points` down the line.
+#' @keywords internal
+
+ppqq_wrangler <- function(y, obj, datax, pp, ...) {
+  ## Nas are removed by default in this function, following qqplot.
+
+  y <- y[!is.na(y)]
+
+  ## Error message straight out of stats::qqplot.
+  if (0 == length(y)) stop("y is empty or has only NAs")
+
+  ## I must check if the object is a "univariateML" object or a function that
+  ## returns a "univariateML" object. If neither, an error is thrown.
+
+  obj <- to_univariateML(y, obj)
+
+  if (!(attr(obj, "continuous"))) {
+    stop("QQ and PP plots are only supported for continuous distributions.")
+  }
+
+  n <- length(y)
+
+  if (pp) {
+    x <- ((1:n) / (n + 1))[order(order(y))]
+    y <- pml(q = y, obj = obj)
+  } else {
+    x <- qml((1:n) / (n + 1), obj = obj)[order(order(y))]
+  }
+
+
+  defaults <- list(lwd = 1)
+
+  if (!pp) {
+    defaults$main <- paste0(attr(obj, "model"), " Q-Q plot")
+    if (!datax) {
+      defaults$ylab <- "Sample Quantiles"
+      defaults$xlab <- "Approximate Theoretical Quantiles"
+    } else {
+      defaults$ylab <- "Approximate Theoretical Quantiles"
+      defaults$xlab <- "Sample Quantiles"
+    }
+  } else {
+    defaults$main <- paste0(attr(obj, "model"), " P-P plot")
+    if (!datax) {
+      defaults$ylab <- "Sample Cumulative Probability"
+      defaults$xlab <- "Theoretical Cumulative Probability"
+    } else {
+      defaults$ylab <- "Theoretical Cumulative Probability"
+      defaults$xlab <- "Sample Cumulative Probability"
+    }
+  }
+
+
+  args <- listmerge(
+    x = defaults,
+    y = list(...)
+  )
+
+  if (!datax) {
+    args$x <- x
+    args$y <- y
+  } else {
+    args$x <- y
+    args$y <- x
+  }
+
+  pp <- NULL
+  pp$value <- if (datax) list(x = y, y = x) else list(x = x, y = y)
+  pp$args <- args
+  pp
 }

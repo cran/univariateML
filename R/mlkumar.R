@@ -9,7 +9,7 @@
 #' @param x a (non-empty) numeric vector of data values.
 #' @param na.rm logical. Should missing values be removed?
 #' @param ... `a0` is an optional starting value for the `a` parameter.
-#'     `rel.tol` is the relative accuracy requested, defaults
+#'     `reltol` is the relative accuracy requested, defaults
 #'     to `.Machine$double.eps^0.25`. `iterlim` is a positive integer
 #'     specifying the maximum number of iterations to be performed before the
 #'     program is terminated (defaults to `100`).
@@ -34,36 +34,29 @@
 #' for double-bounded random processes." Journal of Hydrology 46.1-2 (1980):
 #' 79-88.
 #' @export
+mlkumar <- function(x, na.rm = FALSE, ...) {}
 
-mlkumar <- function(x, na.rm = FALSE, ...) {
-  if (na.rm) x <- x[!is.na(x)] else assertthat::assert_that(!anyNA(x))
-  ml_input_checker(x)
-  assertthat::assert_that(min(x) > 0)
-  assertthat::assert_that(max(x) < 1)
+univariateML_metadata$mlkumar <- list(
+  "model" = "Kumaraswamy",
+  "density" = "extraDistr::dkumar",
+  "support" = intervals::Intervals(c(0, 1), closed = c(FALSE, FALSE)),
+  "names" = c("a", "b"),
+  "default" = c(2, 3)
+)
 
-  dots <- list(...)
+mlkumar_ <- function(x, ...) {
+  n <- length(x)
+  log_x <- log(x)
 
-  a0 <- if (!is.null(dots$a0)) dots$a0 else 1
-
-  rel.tol <- if (!is.null(dots$rel.tol)) {
-    dots$rel.tol
-  } else {
-    .Machine$double.eps^0.25
-  }
-
-  iterlim <- if (!is.null(dots$iterlim)) dots$iterlim else 100
-
-  logs <- log(x)
-
-  for (i in 1:iterlim) {
+  f_over_df <- function(a0) {
     xa <- x^a0
-    T1 <- a0 * mean(logs / (1 - xa))
-    T2 <- a0 * mean(logs * (xa / (1 - xa)))
+    T1 <- a0 * mean(log_x / (1 - xa))
+    T2 <- a0 * mean(log_x * (xa / (1 - xa)))
     T3 <- mean(log(1 - xa))
     f <- 1 / a0 * (1 + T1 + T2 / T3)
 
-    C <- mean(logs^2 * (xa / (1 - xa)^2))
-    D <- mean(logs^2 * (xa / (1 - xa)))
+    C <- mean(log_x^2 * (xa / (1 - xa)^2))
+    D <- mean(log_x^2 * (xa / (1 - xa)))
 
     T1diff <- 1 / a0 * T1 + a0 * C
     T2diff <- 1 / a0 * T2 + 1 / a0 * T2^2 + a0 * D
@@ -71,30 +64,15 @@ mlkumar <- function(x, na.rm = FALSE, ...) {
     fdiff <- -1 / a0^2 * f + 1 / a0 *
       (T1diff + T2diff / T3 + 1 / a0 * (T2 / T3)^2)
 
-    a <- a0 - f / fdiff
-    if (abs((a0 - a) / a0) < rel.tol) break
-    a0 <- a
+    f / fdiff
   }
 
-  if (i == iterlim) {
-    warning(paste0(
-      "The iteration limit (iterlim = ", iterlim, ") was reached",
-      " before the relative tolerance requirement (rel.tol = ",
-      rel.tol, ")."
-    ))
-  }
-
-  ## Given the shape, the scale is easy to compute.
+  dots <- list(...)
+  a0 <- if (!is.null(dots$a0)) dots$a0 else 1
+  a <- newton_raphson_1d(f_over_df, a0, ...)
   b <- -1 / mean(log(1 - x^a))
 
-  object <- c(a = a, b = b)
-  class(object) <- "univariateML"
-  attr(object, "model") <- "Kumaraswamy"
-  attr(object, "density") <- "extraDistr::dkumar"
-  attr(object, "logLik") <-
-    length(x) * (log(a) + log(b) + (a - 1) * mean(log(x)) + -1 + 1 / b)
-  attr(object, "support") <- c(0, 1)
-  attr(object, "n") <- length(x)
-  attr(object, "call") <- match.call()
-  object
+  estimates <- c(a = a, b = b)
+  logLik <- n * (log(a) + log(b) + (a - 1) * mean(log_x) + -1 + 1 / b)
+  list(estimates = estimates, logLik = logLik)
 }

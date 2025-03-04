@@ -7,7 +7,7 @@
 #'
 #' @param x a (non-empty) numeric vector of data values.
 #' @param na.rm logical. Should missing values be removed?
-#' @param ... `rel.tol` is the relative accuracy requested, defaults
+#' @param ... `reltol` is the relative accuracy requested, defaults
 #'     to `.Machine$double.eps^0.25`. `iterlim` is a positive integer
 #'     specifying the maximum number of iterations to be performed before the
 #'     program is terminated (defaults to `100`).
@@ -30,61 +30,32 @@
 #' Johnson, N. L., Kotz, S. and Balakrishnan, N. (1995) Continuous
 #' Univariate Distributions, Volume 1, Chapter 17. Wiley, New York.
 #' @export
+mlgamma <- function(x, na.rm = FALSE, ...) {}
 
-mlgamma <- function(x, na.rm = FALSE, ...) {
-  if (na.rm) x <- x[!is.na(x)] else assertthat::assert_that(!anyNA(x))
-  ml_input_checker(x)
-  assertthat::assert_that(min(x) > 0)
+univariateML_metadata$mlgamma <- list(
+  "model" = "Gamma",
+  "density" = "stats::dgamma",
+  "support" = intervals::Intervals(c(0, Inf), closed = c(FALSE, FALSE)),
+  "names" = c("shape", "rate"),
+  "default" = c(2, 2)
+)
 
-  dots <- list(...)
-
-  rel.tol <- if (!is.null(dots$rel.tol)) {
-    dots$rel.tol
-  } else {
-    .Machine$double.eps^0.25
-  }
-
-  iterlim <- if (!is.null(dots$iterlim)) {
-    dots$iterlim
-  } else {
-    100
-  }
-
+mlgamma_ <- function(x, ...) {
   n <- length(x)
-  mean_hat <- mean(x)
-  L <- mean(log(x))
-  s <- log(mean_hat) - L
+  mean_hat <- sum(x) / n
+  lx_bar <- sum(log(x)) / n
+  s <- log(mean_hat) - lx_bar
 
-  ## This start estimator is very close to the ML estimator already.
-  shape0 <- 1 / (12 * s) * (3 - s + sqrt((s - 3)^2 + 24 * s))
-
-  ## The Newton-Raphson steps.
-  for (i in 1:iterlim) {
-    shape <- shape0 - (log(shape0) - digamma(shape0) - s) /
-      (1 / shape0 - trigamma(shape0))
-    if (abs((shape - shape0) / shape0) < rel.tol) break
-    shape0 <- shape
+  f_over_df <- function(shape0) {
+    (log(shape0) - digamma(shape0) - s) / (1 / shape0 - trigamma(shape0))
   }
 
-  if (i == iterlim) {
-    warning(paste0(
-      "The iteration limit (iterlim = ", iterlim, ") was reached",
-      " before the relative tolerance requirement (rel.tol = ",
-      rel.tol, ")."
-    ))
-  }
-
-  ## Given the shape, the rate is easy to compute.
+  shape0 <- 1 / (12 * s) * (3 - s + sqrt((s - 3)^2 + 24 * s)) * 0.9989 + 0.0102
+  shape <- newton_raphson_1d(f_over_df, shape0, ...)
   rate <- shape / mean_hat
 
-  object <- c(shape = shape, rate = rate)
-  class(object) <- "univariateML"
-  attr(object, "model") <- "Gamma"
-  attr(object, "density") <- "stats::dgamma"
-  attr(object, "logLik") <- n * (shape * log(rate) - log(gamma(shape)) +
-    (shape - 1) * L - rate * mean_hat)
-  attr(object, "support") <- c(0, Inf)
-  attr(object, "n") <- length(x)
-  attr(object, "call") <- match.call()
-  object
+  estimates <- c(shape = shape, rate = rate)
+  logLik <- n * (shape * log(rate) - log(gamma(shape)) + (shape - 1) * lx_bar - rate * mean_hat)
+
+  list(estimates = estimates, logLik = logLik)
 }
